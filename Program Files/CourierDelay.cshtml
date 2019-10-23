@@ -1,0 +1,69 @@
+<div ng-controller="CourierDelayController" ng-form="CourierDelayDtlsForm">
+    <div class="panel-heading text-white">
+        Courier Delay
+    </div>
+    <div class="col-lg-12 col-sm-12 col-md-12 paddingleftright0">
+        <div name="ValidtionSummary" id="idReqValidation">
+            <div id="formerrorid">
+                <ul class="error-messages-val" ng-messages="CourierDelayDtlsForm.txtTo.$error">
+                    <li ng-message="required">
+                        <a href="#" class="icon_close closeicontop" ng-click="HideValidationDiv()"></a>
+                        Valid To Required.
+                    </li>
+                </ul>
+                <ul class="error-messages-val" ng-messages="CourierDelayDtlsForm.txtFrom.$error">
+                    <li ng-message="required">
+                        <a href="#" class="icon_close closeicontop" ng-click="HideValidationDiv()"></a>
+                        Valid From Required.
+                    </li>
+                </ul>
+            </div>
+            <div ng-if="ErrorMsg != ''" id="errorid">
+                <a href="#" class="icon_close" ng-click="HideValidationDiv()" id="anchorclose"></a>
+                <label class="text-red" compile="ErrorMsg" style="font-weight:normal!important"></label>
+            </div>
+        </div>
+       <div name="success" id="success" class="form-group" ng-class="addClass">
+            <label id="SuccessMsgid"> {{SuccessMsg}}</label>
+        </div>
+    </div>
+    <div class="form-group scrollboxTasklog" id="scrollMainScreen" ng-init="resizeModuleSub()">
+        <div id="scrollsubcontent">
+            <div class="white-bg">
+                <div class="row form-group">
+                    <label class="col-lg-2 col-sm-2 col-md-2 paddingleft0right7" id="lblFrom">From</label>
+                    <label class="col-lg-2 col-sm-2 col-md-2 paddingleft0right7" id="lblTo">To</label>
+                    <div class="col-lg-2 col-sm-3 col-md-3 paddingleft0right7">
+                    </div>
+                    <label class="col-lg-2 col-sm-2 col-md-2 paddingleft0right7" id="lblRating">Rating</label>
+                    <div class="col-lg-2 col-sm-2 col-md-2 paddingleft0right7">
+                    </div>
+                </div>
+                <div class="row form-group">
+                    <div class="col-lg-2 col-sm-2 col-md-2 paddingleft0right7"><input type="text" class="form-control" id="txtFrom" name="txtFrom" ng-model="CourierDelayDtls.ValidFrom" jqdatepicker="jqdatepicker" ng-required="true" ng-class="{red: CourierDelayDtlsForm.txtFrom.$invalid}" /></div>
+                    <div class="col-lg-2 col-sm-2 col-md-2 paddingleft0right7"><input type="text" class="form-control" id="txtTo" name="txtTo" ng-model="CourierDelayDtls.ValidTo" jqdatepicker="jqdatepicker" ng-required="true" ng-class="{red: CourierDelayDtlsForm.txtTo.$invalid}" /></div>
+                    <div class="col-lg-2 col-sm-3 col-md-3 paddingleft0right7 margin-top-neg-5">
+                        <button class="btn btn-primary bluebutton" id="btnSearch" ng-click="BindCourierDelay()">Search</button>
+                        <button class="btn btn-primary bluebutton" id="btnReset" ng-click="onLoad('reset')">Reset</button>
+                    </div>
+                    <div class="col-lg-2 col-sm-2 col-md-2 paddingleft0right7" id="lblRating"><input type="text" class="form-control NumericRight-Align" id="txtRating" ng-model="CourierDelayDtls.QualityIdx" maxlength="3" numbers-only ng-Blur="ChangeQualityIdx()" /></div>
+                    <div class="col-lg-2 col-sm-2 col-md-2 paddingleft0right7 margin-top-neg-5">
+                        <button class="btn btn-primary bluebutton" id="btnSearch" ng-click="UpdateCourierRating()">Update Rating</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row form-group paddingleftright0 margin-b10" id="ScrollSubGrid" ng-init="resizeModuleSub()">
+            <gridcontrol-controller source="CourierDelayList" id-New="NewId" req-Obj="ReqObj" column-List="ColumnList" virtual-Mode="VirtualMode" page-Size="PageSize" sorting="sorting" height="Height" is-Pagervisible="IsPagerVisible" summary-Info="SummaryInfo">
+            </gridcontrol-controller>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $('#ScrollSubGrid, #scrollMainScreen').enscroll({
+        showOnHover: false,
+        verticalTrackClass: 'track3',
+        verticalHandleClass: 'handle3'
+    });
+</script>

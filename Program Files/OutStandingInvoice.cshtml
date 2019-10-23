@@ -1,0 +1,177 @@
+<div ng-controller="OutStandingInvoiceController" ng-form="OutStandingInvoiceForm">
+    <div class="panel-heading text-white margin-b-5">
+        Outstanding Invoice
+        <span style="vertical-align:top;">
+            <i class="sprite icon-WhiteSave padding-left-10" id="ImgSave" style="display:inline-block; margin-bottom:-4px;" ng-click="TransOutstandingInvoiceDtls()" title="Save"></i>
+        </span>
+    </div>    
+    <div class="col-lg-12 col-sm-12 col-md-12 paddingleftright0">
+        <div name="ValidtionSummary" id="idReqValidation">
+            <div id="formerrorid">
+                <ul class="error-messages-val" ng-messages="OutStandingInvoiceForm.txtNewMemo.$error">
+                    <li ng-message="required">
+                        <a href="#" class="icon_close closeicontop" ng-click="HideValidationDiv()"></a>
+                        New Memo Required.
+                    </li>
+                </ul>
+            </div>
+            <div ng-if="ErrorMsg != ''" id="errorid">
+                <a href="#" class="icon_close" ng-click="HideValidationDiv()" id="anchorclose"></a>
+                <label class="text-red" compile="ErrorMsg" style="font-weight:normal!important"></label>
+            </div>
+        </div>
+        <div name="success" id="success" class="form-group" ng-class="addClass">
+            <label id="SuccessMsgid"> {{SuccessMsg}}</label>
+        </div>
+    </div>
+    <div class="form-group scrollboxTasklog" id="scrollMainScreen" ng-init="resizeModuleSub()">
+        <div class="subheader padding-left-5">
+            <b>Invoice Details</b>
+        </div>
+        <div class="white-bg">
+            <div class="row form-group">
+                <label class="col-lg-1 col-md-1 col-sm-1 text-right paddingleft0right7">Contact : </label>
+                <label class="col-lg-3 col-md-3 col-sm-3 paddingleftright0 darkgreycolor" ng-bind="CustOutStandingInvoice.FullName"></label>
+                <label class="col-lg-1 col-md-1 col-sm-1 text-right paddingleft0right7">Phone : </label>
+                <label class="col-lg-3 col-md-3 col-sm-3 paddingleftright0 darkgreycolor" ng-bind="CustOutStandingInvoice.PhoneNum"></label>
+            </div>
+            <div class="row form-group margin-top-5">
+                <label class="col-lg-1 col-md-1 col-sm-1 text-right paddingleft0right7">Fax : </label>
+                <label class="col-lg-3 col-md-3 col-sm-3 paddingleftright0 darkgreycolor" ng-bind="CustOutStandingInvoice.FaxNum"></label>
+                <label class="col-lg-1 col-md-1 col-sm-1 text-right paddingleft0right7">Last Pay : </label>
+                <label class="col-lg-3 col-md-3 col-sm-3 paddingleftright0 darkgreycolor" ng-bind="CustOutStandingInvoice.LastPayment"></label>
+            </div>
+            <div class="row form-group margin-top-5">
+                <label class="col-lg-1 col-md-1 col-sm-1 text-right paddingleft0right7">Sale Rep : </label>
+                <label class="col-lg-3 col-md-3 col-sm-3 paddingleftright0 darkgreycolor" ng-bind="CustOutStandingInvoice.SalesRep"></label>
+                <label class="col-lg-1 col-md-1 col-sm-1 text-right paddingleft0right7">Opened : </label>
+                <label class="col-lg-3 col-md-3 col-sm-3 paddingleftright0 darkgreycolor" ng-bind="CustOutStandingInvoice.AcctCreatedDt"></label>
+
+            </div>
+            <div class="row form-group margin-top-5">
+                <label class="col-lg-1 col-md-1 col-sm-1 text-right paddingleft0right7">Email : </label>
+                <label class="col-lg-3 col-md-3 col-sm-3 paddingleftright0" ng-bind="CustOutStandingInvoice.EmailAddr"><a href="#"></a></label>
+            </div>
+            <div class="row form-group margin-top-5">
+                <label class="col-lg-1 col-md-1 col-sm-1 text-right paddingleft0right7">New Memo : </label>
+                <div class="col-lg-7 col-md-7 col-sm-7 paddingleft0right7">
+                    <textarea id="txtDescription" class="form-control" name="txtNewMemo" ng-model="CustOutStandingInvoice.Note" ng-required="true" ng-class="{red: OutStandingInvoiceForm.txtNewMemo.$invalid}" maxlength="1000"></textarea>
+                </div>
+                <label class="col-lg-3 col-md-3 col-sm-3 paddingleftright0 margin-top-neg-5">Select invoices and click date to assign follow up :</label><br />
+                <div class="col-lg-2 col-md-2 col-sm-2 paddingleft0right7" style="margin-top:-4px;">
+                    <input class="form-control" id="txtFollowUp" maxlength="10" type="text" ng-model="FollowUp" jqdatepicker="jqdatepicker">
+                </div>
+            </div>
+        </div>
+        <div class="subheader padding-left-5">
+            <b>Customer Notification Details</b>
+        </div>
+        <div class="row form-group paddingleftright0 margin-b10" id="ScrollSubGrid" ng-init="resizeModuleSub()">
+            <gridcontrol-controller source="OutStandingInvoiceList" id-New="NewId" req-Obj="ReqObj" column-List="ColumnList" virtual-Mode="VirtualMode" page-Size="OutStandingInvoiceList.PageSize" sorting="sorting" height="Height" is-Pagervisible="IsPagerVisible" summary-Info="SummaryInfo">
+            </gridcontrol-controller>
+        </div>
+        <div class="subheader padding-left-5 margin-top-10">
+            <b>Send Invoices</b>
+        </div>
+        <div class="white-bg">
+            <div class="subheader padding-left-5 margin-top-5">
+                <b>Send Electronic Fax</b>
+            </div>
+            <div class="white-bg">
+                <div class="row form-group">
+                    <div class="col-lg-2 col-md-2 col-sm-2 paddingleftright0">
+                    </div>
+                    <label class="col-lg-2 col-md-2 col-sm-2 paddingleftright0" ng-hide="viaFax">Address</label>
+                    <label class="col-lg-2 col-md-2 col-sm-2 paddingleftright0" ng-show="viaFax">Fax To</label>
+                    <label class="col-lg-2 col-md-2 col-sm-2 paddingleftright0">Message</label>
+                </div>
+                <div class="row form-group">
+                    <label class="col-lg-1 col-md-1 col-sm-1 text-right margin-top-2">Via :</label>
+                    <div class="col-lg-1 col-md-1 col-sm-1 paddingleft0right7">
+                        <select class="form-control red" id="cmbVia" name="cmbVia" ng-required="true" ng-model="EFaxVia" ng-options="c.CodeId as c.CodeDisplayName for c in OutStandingInvoiceEFax" ng-change="CheckEFaxVia(true)"></select>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-2 paddingleft0right7">
+                        <input class="form-control text-left" maxlength="50" name="txtAddress" id="txtAddress" type="text" ng-model="EFaxAddress" ng-show="viaEmail">
+                        <input class="form-control text-left" maxlength="50" name="txtFax" id="txtFax" type="text" ng-model="EFaxAddress" ng-show="viaFax">
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-2 paddingleft0right7">
+                        <input class="form-control text-left" maxlength="500" name="txtMessage" id="txtMessage" type="text" ng-model="EFaxMessage">
+                    </div>
+                    <div class="col-lg-6 col-sm-6 col-md-6 pull-right paddingleftright0">
+                        <button class="btn btn-primary bluebutton no-margin pull-right" id="btnSend" ng-click="SendElecInvoiceDtls(EFaxVia)">Send</button>
+                    </div>
+                </div>
+            </div>
+            <div class="subheader padding-left-5 margin-top-10">
+                <b>Send Statement</b>
+            </div>
+            <div class="white-bg">
+                <div class="row form-group">
+                    <div class="col-lg-2 col-md-2 col-sm-2 paddingleftright0">
+                    </div>
+                    <label class="col-lg-2 col-md-2 col-sm-2 paddingleftright0" ng-hide="viaFaxSendStmt">Address</label>
+                    <label class="col-lg-2 col-md-2 col-sm-2 paddingleftright0" ng-show="viaFaxSendStmt">Fax To</label>
+                    <label class="col-lg-2 col-md-2 col-sm-2 paddingleftright0" ng-hide="viaFaxSendStmt">Address CC</label>
+                    <label class="col-lg-2 col-md-2 col-sm-2 paddingleftright0">Message</label>
+                </div>
+                <div class="row form-group">
+                    <label class="col-lg-1 col-md-1 col-sm-1 text-right margin-top-2">Via :</label>
+                    <div class="col-lg-1 col-md-1 col-sm-1 paddingleft0right7">
+                        <select class="form-control red" id="cmbVia" name="cmbVia" ng-required="true" ng-model="SendStmtVia" ng-options="c.CodeId as c.CodeDisplayName for c in OutStandingInvoiceStmt" ng-change="CheckSendStmtVia(true)"></select>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-2 paddingleft0right7">
+                        <input class="form-control text-left" maxlength="50" name="txtEmailSendStmt" id="txtEmailSendStmt" type="text" ng-model="SendStmtAddress" ng-show="viaEmailSendStmt">
+                        <input class="form-control text-left" maxlength="50" name="txtFaxSendStmt" id="txtFaxSendStmt" type="text" ng-model="SendStmtAddress" ng-show="viaFaxSendStmt">
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-2 paddingleft0right7" ng-show="viaEmailSendStmt">
+                        <input class="form-control text-left" maxlength="500" name="txtAddressCC" id="txtAddressCC" type="text" ng-model="SendStmtAddressCC" ng-show="viaEmailSendStmt">
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-2 paddingleft0right7">
+                        <input class="form-control text-left" maxlength="500" name="txtMessage" id="txtMessage" type="text" ng-model="SendStmtMessage">
+                    </div>
+                    <div class="col-lg-4 col-sm-4 col-md-4 pull-right paddingleftright0">
+                        <button class="btn btn-primary bluebutton no-margin pull-right" id="btnSend" ng-click="SendstatementInvoiceDtls(SendStmtVia)">Send</button>
+                    </div>
+                </div>
+            </div>
+            <div class="subheader padding-left-5 margin-top-10">
+                <b>Send Dunning Notification</b>
+            </div>
+            <div class="white-bg">
+                <div class="row form-group">
+                    <div class="col-lg-2 col-md-2 col-sm-2 paddingleftright0">
+                    </div>
+                    <label class="col-lg-2 col-md-2 col-sm-2 paddingleftright0">Address</label>
+
+                    <label class="col-lg-2 col-md-2 col-sm-2 paddingleftright0">Address CC</label>
+                    <label class="col-lg-2 col-md-2 col-sm-2 paddingleftright0">Message</label>
+                </div>
+                <div class="row form-group">
+                    <label class="col-lg-1 col-md-1 col-sm-1 text-right margin-top-2">Via :</label>
+                    <div class="col-lg-1 col-md-1 col-sm-1 paddingleft0right7">
+                        <select class="form-control red" id="cmbVia" name="cmbVia" ng-required="true" ng-model="DunnNotifyVia" ng-options="c.CodeId as c.CodeDisplayName for c in OutStandingInvoiceDunnNotify"></select>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-2 paddingleft0right7">
+                        <input class="form-control text-left" maxlength="50" name="txtAddress" id="txtAddress" type="text" ng-model="DunnNotifyAddress">
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-2 paddingleft0right7">
+                        <input class="form-control text-left" maxlength="500" name="txtAddressCC" id="txtAddressCC" type="text" ng-model="DunnNotifyAddressCC">
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-2 paddingleft0right7">
+                        <input class="form-control text-left" maxlength="500" name="txtMessage" id="txtMessage" type="text" ng-model="DunnNotifyMessage">
+                    </div>
+                    <div class="col-lg-4 col-sm-4 col-md-4 pull-right paddingleftright0">
+                        <button class="btn btn-primary bluebutton no-margin pull-right" id="btnSend" ng-click="SendDunningInvoiceDtls()">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $('#scrollMainScreen').enscroll({
+        showOnHover: false,
+        verticalTrackClass: 'track3',
+        verticalHandleClass: 'handle3'
+    });
+</script>

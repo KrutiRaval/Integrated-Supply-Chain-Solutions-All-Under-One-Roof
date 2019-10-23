@@ -1,0 +1,609 @@
+app.controller("CourierServiceAreasController", ['$scope', '$http', '$location', 'ngEncryption', 'DataService', '$filter', '$rootScope', '$linq', '$confirm', '$modal', '$timeout',
+    function ($scope, $http, $location, ngEncryption, DataService, $filter, $rootScope, $linq, $confirm, $modal, $timeout) {
+        $scope.openModuleChange = function () {
+            $location.path('/Courier')
+        }
+        $scope.resizeModuleSub = function () {
+            $rootScope.$broadcast('resizeModuleSubChild');
+        }
+        window.onresize = $scope.resizeModuleSub;
+        function isEmpty(val) {
+            return (val === undefined || val == null || val.length <= 0 || val == "") ? true : false;
+        }
+        $scope.HideValidationDiv = function () {
+            angular.element('#idReqValidation').hide();
+            angular.element('#errorid').hide();
+            angular.element('#formerrorid').hide();
+        }
+        onLoad();
+        function onLoad() {
+            $scope.CourierServiceAreasDtls = {};
+            $scope.CourierServiceAreasList = [];
+            $scope.CourierServiceAreasDtls.SvcAreaId = 0;
+            $scope.RouteWorkServiceList = [];
+            $("#cmbareatype").focus();
+            BindComboValues();
+            $scope.IsOnEditDetail = false;
+            $scope.IsAirport = false;
+            $scope.IsZipPostalCode = false;
+            $scope.IsRouteWork = false;
+            $scope.IsPostalCodeAirport = true;
+            $scope.GetRecordStatus = "Active";
+            $scope.CourierId = DataService.GetServiceData();
+            $("#ImgDelete").addClass('disabled');
+            angular.element('#success').hide();
+            $scope.CourierServiceAreasDtls.ValidFrom = $filter('date')(new Date(), "MM/dd/yyyy");
+        }
+        function BindComboValues() {
+            var objcombo =
+            {
+                "CategoryName": 'CourierServiceArea'
+            };
+            var data = ngEncryption.encrypt(JSON.stringify(objcombo));
+            var requestCombo = $http({
+                method: "GET",
+                url: "api/General/GetFillComboList",
+                params: { CategoryName: data }
+            }).then(function successResult(successData) {
+                if (successData.status != "202") {
+                    var obj = JSON.parse(successData.data);
+                    $scope.CCourierServiceAreasList = obj.CourierServiceArea;
+                }
+                else {
+                    $scope.ErrorMsg = successData.data;
+                }
+            }, function errorResult() {
+            });
+        }
+        $scope.rdBtnChange = function (value) {
+            if (value == 'Deleted' || value == 'All') {
+                $scope.NotActiveFlag = true;
+                $("#idAirSearch").addClass('disabled');
+                $("#idZipSearch").addClass('disabled');
+                $("#idCustSearch").addClass('disabled');
+            }
+            else {
+                $scope.NotActiveFlag = false;
+                $("#idAirSearch").removeClass('disabled');
+                $("#idZipSearch").removeClass('disabled');
+                $("#idCustSearch").removeClass('disabled');
+            }
+            $scope.GetRecordStatus = value;
+            $scope.CourierServiceAreasDtls = {};
+            $scope.HideValidationDiv();
+            $scope.SuccessMsg = '';
+            angular.element('#success').hide();
+            $scope.CourierServiceAreasList = [];
+            $scope.CourierServiceAreasDtls.SvcAreaId = 0;
+            $scope.RouteWorkServiceList = [];
+            $scope.IsAirport = false;
+            $scope.IsZipPostalCode = false;
+            $scope.IsRouteWork = false;
+            $scope.IsPostalCodeAirport = true;
+            $("#cmbareatype").focus();
+            BindCourierServiceAreas();
+        }
+        $scope.NewId = "IdServiceAreaGD";
+        BindCourierServiceAreas();
+        function BindCourierServiceAreas() {
+            $scope.IsPagerVisible = false;
+            $scope.Height = "200";
+            $scope.sorting = true;
+            $scope.VirtualMode = false;
+            $scope.CourierServiceAreasList.PageSize = "100";
+            $scope.ColumnList = [
+            {
+                dataField: "AreaType", allowSorting: true, caption: "Area Type", cellTemplate: function myfunction(container, options) {
+                    $('<a/>').addClass('dx-link')
+                    .text(options.data.AreaType)
+                    .on('dxclick', function () {
+                        $scope.EditCouriersvcAreaDetails(options.data.SvcAreaId, options.data.AreaTypeId);
+                    })
+           .appendTo(container);
+                }
+            },
+            {
+                dataField: "AreaKey", allowSorting: true, caption: "Zip/PostalCode/Airport/RouteWorkId"
+            },
+            {
+                dataField: "CustName", allowSorting: true, caption: "Customer Name"
+            },
+            ];
+            $scope.SummaryInfo = [{
+                showInColumn: "CustName",
+                summaryType: "count",
+                displayFormat: "Total Count: {0}",
+                alignByColumn: true,
+                showInGroupFooter: true
+            }];
+            var ReqObj =
+           {
+               "CourierId": $scope.CourierId,
+               "GetRecordStatus": $scope.GetRecordStatus,
+               "SvcAreaId": $scope.CourierServiceAreasDtls.SvcAreaId,
+               "PageIndex": 0,
+               "PageSize": 10,
+               "Query": "CourierId"
+           };
+            var data = ngEncryption.encrypt(JSON.stringify(ReqObj));
+            var requestcombo = $http({
+                method: "POST",
+                url: "api/Courier/GetCourierSvcAreaDetails",
+                params: { "RequestText": data }
+            }).then(function successresult(successdata) {
+                if (successdata.status != "202") {
+                    if (!isEmpty(successdata.data) && successdata.data.length > 0) {
+                        var obj = JSON.parse(successdata.data);
+                        if ($scope.CourierServiceAreasDtls.SvcAreaId == 0) {
+                            $scope.CourierServiceAreasList = !isEmpty(obj.CourierSvcAreaList) ? obj.CourierSvcAreaList : [];
+                            $scope.RouteWorkServiceList = obj.RouteWorkList;
+                            $scope.CourierServiceAreasDtls.ValidFrom = $filter('date')(new Date(), "MM/dd/yyyy");
+                            $scope.resizeModuleSub();
+                            $scope.$broadcast('DataSourceUpdate', $scope.CourierServiceAreasList);
+                        }
+                        else {
+                            $scope.CourierServiceAreasDtls = obj.CourierSvcAreaList[0];
+                            $scope.CourierServiceAreasDtls.Mode = "Edit";
+                            $scope.CourierServiceAreasDtls.ValidFrom = !isEmpty($scope.CourierServiceAreasDtls.ValidFrom) ? $filter('date')($scope.CourierServiceAreasDtls.ValidFrom, "MM/dd/yyyy") : null;
+                            $scope.CourierServiceAreasDtls.ValidTo = !isEmpty($scope.CourierServiceAreasDtls.ValidTo) ? $filter('date')($scope.CourierServiceAreasDtls.ValidTo, "MM/dd/yyyy") : null;
+                            $scope.CourierServiceAreasDtls.AreaTypeId = !isEmpty($scope.CourierServiceAreasDtls.AreaTypeId) ? $scope.CourierServiceAreasDtls.AreaTypeId.toString() : "";
+                            var Type = $linq.Enumerable().From($scope.CCourierServiceAreasList)
+                                     .Where(function (x) {
+                                         return x.CodeId == $scope.CourierServiceAreasDtls.AreaTypeId;
+                                     })
+                                     .Select(function (x) {
+                                         return x.CodeDisplayName;
+                                     }).FirstOrDefault();
+                            if (Type == "Route Master") {
+                                var routeareadtls = $linq.Enumerable().From($scope.RouteWorkServiceList).Where(function myfunction(x) {
+                                    return x.RouteWorkId == $scope.CourierServiceAreasDtls.AreaKey;
+                                }).Select(function (x) { return x }).FirstOrDefault();
+                                if (!isEmpty(routeareadtls)) {
+                                    $scope.CourierServiceAreasDtls.RouteAreaKey = !isEmpty(routeareadtls.RouteMasterID) ? routeareadtls.RouteMasterID : 'ALL';
+                                    $scope.CourierServiceAreasDtls.AreaKey = "";
+                                }
+                            }
+                        }
+                        ControlEnableDisableBasedonStatus($scope.CourierServiceAreasDtls.Mode);
+                    }
+                }
+                else {
+                    $scope.ErrorMsg = successdata.data;
+                }
+            }, function myfunction() {
+            });
+        }
+
+        function ControlEnableDisableBasedonStatus(Mode) {
+            if ($scope.GetRecordStatus != "Active") {
+                $("#ImgAdd").addClass('disabled');
+                $("#ImgSave").addClass('disabled');
+                $("#ImgDelete").addClass('disabled');
+                $scope.IsOnEditDetail = true;
+                $('#idAirSearch').addClass('disabled');
+                $('#idZipSearch').addClass('disabled');
+                $('#idCustSerach').addClass('disabled');
+            }
+            else if ($scope.GetRecordStatus == "Active" && Mode == "Edit") {
+                $("#ImgAdd").removeClass('disabled');
+                $("#ImgSave").removeClass('disabled');
+                $("#ImgDelete").removeClass('disabled');
+                $("#idAirSearch").removeClass('disabled');
+                $("#idZipSearch").removeClass('disabled');
+                $("#idCustSerach").removeClass('disabled');
+                $scope.IsOnEditDetail = true;
+                $timeout(function myfunction() {
+                    $("#cmbareatype").focus();
+                }, 0);
+            }
+            else if ($scope.GetRecordStatus == "Active" && Mode == "Add") {
+                $("#ImgAdd").removeClass('disabled');
+                $("#ImgSave").removeClass('disabled');
+                $("#ImgDelete").addClass('disabled');
+                $("#idAirSearch").removeClass('disabled');
+                $("#idZipSearch").removeClass('disabled');
+                $("#idCustSerach").removeClass('disabled');
+                $scope.IsPostalCodeAirport = true;
+                $scope.IsOnEditDetail = false;
+                $timeout(function myfunction() {
+                    $("#cmbareatype").focus();
+                }, 0);
+            }
+            else {
+                $("#ImgAdd").removeClass('disabled');
+                $("#ImgSave").removeClass('disabled');
+                $("#ImgDelete").addClass('disabled');
+                $("#idAirSearch").removeClass('disabled');
+                $("#idZipSearch").removeClass('disabled');
+                $("#idCustSerach").removeClass('disabled');
+                $scope.IsPostalCodeAirport = true;
+                $scope.IsOnEditDetail = false;
+                $timeout(function myfunction() {
+                    $("#cmbareatype").focus();
+                }, 0);
+            }
+
+        }
+
+
+
+        function CheckValidTo() {
+            if (!isEmpty($scope.CourierServiceAreasDtls.ValidFrom) && !isEmpty($scope.CourierServiceAreasDtls.ValidTo)) {
+                if (new Date($scope.CourierServiceAreasDtls.ValidFrom) > new Date($scope.CourierServiceAreasDtls.ValidTo)) {
+                    if ($scope.ErrorMsg != '')
+                        $scope.ErrorMsg = $scope.ErrorMsg + '\n' + 'Valid From should not be greater than Valid To.';
+                    else
+                        $scope.ErrorMsg = 'Valid From should not be greater than Valid To.';
+                    angular.element('#idReqValidation').show();
+                    angular.element("#errorid").show();
+                    $scope.CourierServiceAreasDtls.ValidTo = null;
+                    return false;
+                }
+            }
+            return true;
+        }
+        $scope.AddCouriersvcAreaDetails = function () {
+            $scope.ErrorMsg = "";
+            $scope.HideValidationDiv();
+            angular.element('#success').hide();
+            OnAdd();
+        }
+        function OnAdd() {
+            $scope.CourierServiceAreasDtls = {};
+            $scope.CourierServiceAreasDtls.Mode = "Add";
+            $("#cmbareatype").focus();
+            $scope.IsPostalCodeAirport = true;
+            $scope.IsOnGetDetail = false;
+            $scope.IsOnAddDetail = true;
+            $scope.IsOnEditDetail = false;
+            $scope.CheckAreaType();
+            $("#ImgSave").removeClass('disabled');
+            $("#ImgDelete").addClass('disabled');
+            $scope.CourierServiceAreasDtls.ValidFrom = $filter('date')(new Date(), "MM/dd/yyyy");
+        }
+        $scope.EditCouriersvcAreaDetails = function (SvcAreaId, AreaTypeId) {
+            $scope.ErrorMsg = "";
+            $scope.HideValidationDiv();
+            angular.element('#success').hide();
+            $("#cmbareatype").focus();
+            $scope.IsOnGetDetail = false;
+            $scope.IsOnAddDetail = false;
+            $scope.IsOnEditDetail = true;
+            $("#ImgSave").removeClass('disabled');
+            $("#ImgDelete").removeClass('disabled');
+            $scope.CourierServiceAreasDtls.SvcAreaId = SvcAreaId;
+            $scope.CourierServiceAreasDtls.AreaTypeId = AreaTypeId;
+            $scope.CheckAreaType();
+            $scope.CourierServiceAreasDtls.Mode = "Edit";
+            BindCourierServiceAreas();
+        }
+		 $scope.SaveCouriersvcAreaDetails = function () {
+            $scope.ErrorMsg = "";
+            $scope.HideValidationDiv();
+            angular.element('#success').hide();
+
+            if (isEmpty($scope.CourierServiceAreasDtls.SvcAreaId)) {
+                angular.element('#formerrorid').show();
+            }
+            CheckValidTo();
+            var Type = $linq.Enumerable().From($scope.CCourierServiceAreasList)
+                                      .Where(function (x) {
+                                          return x.CodeId == $scope.CourierServiceAreasDtls.AreaTypeId;
+                                      })
+                                      .Select(function (x) {
+                                          return x.CodeDisplayName;
+                                      }).FirstOrDefault();
+            if ($scope.CourierServiceAreasForm.$valid || $scope.CourierServiceAreasDtls.Mode == "Delete") {
+                if (isEmpty($scope.CourierServiceAreasDtls.SvcAreaId)) {
+                    $scope.CourierServiceAreasDtls.Mode = "Add";
+                }
+                if ($scope.ErrorMsg != "")
+                    return;
+                var ReqObj =
+            {
+                "SvcAreaId": $scope.CourierServiceAreasDtls.SvcAreaId,
+                "CourierId": $scope.CourierId,
+                "AreaTypeId": $scope.CourierServiceAreasDtls.AreaTypeId,
+                "AreaType": $scope.CourierServiceAreasDtls.AreaType,
+                "AreaKey": (Type == "Route Master") ? !isEmpty($scope.CourierServiceAreasDtls.RouteAreaKey) ? $scope.CourierServiceAreasDtls.RouteAreaKey : 'ALL' : $scope.CourierServiceAreasDtls.AreaKey,
+                "CustCode": $scope.CourierServiceAreasDtls.CustCode,
+                "ValidFrom": $scope.CourierServiceAreasDtls.ValidFrom,
+                "ValidTo": $scope.CourierServiceAreasDtls.ValidTo,
+                "ModifiedOn": $scope.CourierServiceAreasDtls.ModifiedOn,
+                "Mode": $scope.CourierServiceAreasDtls.Mode
+            };
+                var data = ngEncryption.encrypt(JSON.stringify(ReqObj));
+                var requestCombo = $http({
+                    method: "POST",
+                    url: "api/Courier/TransCouriersvcAreaDetails",
+                    params: { "RequestText": data }
+                }).then(function successResult(successData) {
+                    if (successData.status != "202") {
+                        if (!isEmpty(successData.data) && successData.data.length > 0) {
+                            var obj = JSON.parse(successData.data);
+                            $scope.IsOnGetDetail = true;
+                            $scope.IsOnAddDetail = false;
+                            $scope.IsOnEditDetail = false;
+                            if ($scope.CourierServiceAreasDtls.Mode == "Add" || $scope.CourierServiceAreasDtls.Mode == "Edit") {
+                                $scope.addClass = 'success';
+                                $scope.SuccessMsg = "Record Saved Successfully!";
+                                angular.element('#success').show();
+                            }
+                            else {
+                                $scope.addClass = 'deletedmsg';
+                                $scope.SuccessMsg = "Record deleted successfully.";
+                                angular.element('#success').show();
+                            }
+                            $("#ImgSave").removeClass('disabled');
+                            $("#ImgDelete").removeClass('disabled');
+                            $scope.CourierServiceAreasList = $linq.Enumerable().From(obj)
+                                                           .Select(function (x) {
+                                                               x.ValidFrom = !isEmpty(x.ValidFrom) ? $filter('date')(x.ValidFrom, "MM/dd/yyyy") : null;
+                                                               x.ValidTo = !isEmpty(x.ValidTo) ? $filter('date')(x.ValidTo, "MM/dd/yyyy") : null;
+                                                               return x;
+                                                           }).ToArray();
+                            $scope.$broadcast('DataSourceUpdate', $scope.CourierServiceAreasList);
+                            $timeout(function () {
+                                $scope.CourierServiceAreasDtls = angular.copy($scope.CourierServiceAreasList[0]);
+                                $scope.IsOnEditDetail = true;
+                                $scope.resizeModuleSub();
+                                $("#cmbareatype").focus();
+                                $scope.CourierServiceAreasDtls.AreaTypeId = !isEmpty($scope.CourierServiceAreasDtls.AreaTypeId) ? $scope.CourierServiceAreasDtls.AreaTypeId.toString() : "";
+                                $scope.CourierServiceAreasDtls.AreaKey = !isEmpty($scope.CourierServiceAreasDtls.AreaKey) ? $scope.CourierServiceAreasDtls.AreaKey.toString() : "";
+                                if ($scope.CourierServiceAreasDtls.AreaType == "RouteMaster") {
+                                    var routeareadtls = $linq.Enumerable().From($scope.RouteWorkServiceList).Where(function myfunction(x) {
+                                        return x.RouteWorkId == $scope.CourierServiceAreasDtls.AreaKey;
+                                    }).Select(function (x) { return x }).FirstOrDefault();
+                                    if (!isEmpty(routeareadtls)) {
+                                        $scope.CourierServiceAreasDtls.RouteAreaKey = !isEmpty(routeareadtls.RouteMasterID) ? routeareadtls.RouteMasterID : 'ALL';
+                                        $scope.CourierServiceAreasDtls.AreaKey = "";
+                                    }                                    
+                                }
+                                $scope.CourierServiceAreasDtls.Mode = "Edit";
+                                HideControls();
+                            }, 0);                            
+                        }
+                        else {
+                            if ($scope.CourierServiceAreasDtls.Mode == "Delete") {
+                                $scope.addClass = 'deletedmsg';
+                                $scope.SuccessMsg = "Record deleted successfully.";
+                                angular.element('#success').show();
+                                $("#ImgDelete").addClass('disabled');
+                            }
+                            $scope.CourierServiceAreasList = [];
+                            $scope.$broadcast('DataSourceUpdate', $scope.CourierServiceAreasList);
+                            OnAdd();
+                        }
+                        ControlEnableDisableBasedonStatus($scope.CourierServiceAreasDtls.Mode);
+                    }
+                    else {
+                        $scope.ErrorMsg = successData.data;
+                        angular.element('#idReqValidation').show();
+                        angular.element('#errorid').show();
+                    }
+                }, function myfunction() {
+                });
+            }
+            else {
+                angular.element('#idReqValidation').show();
+                angular.element('#errorid').show();
+                angular.element('#formerrorid').show();
+            }
+        }
+        $scope.DeleteCouriersvcAreaDetails = function () {
+            $scope.ErrorMsg = "";
+            angular.element('#success').hide();
+            $scope.HideValidationDiv();
+            if ($scope.CourierServiceAreasDtls.IsCourierVehicleExists > 0) {
+                $confirm({ text: 'Selected Service Area is associated with Courier Vehicle. Are you sure you want to delete? ', title: 'Delete', ok: 'Yes', cancel: 'No' })
+                                   .then(function (yes) {
+                                       $scope.CourierServiceAreasDtls.Mode = "Delete";
+                                       $scope.SaveCouriersvcAreaDetails();
+                                   }, function (no) {
+                                       return;
+                                   });
+            }
+            else {
+                $confirm({ text: 'Are you sure you want to Delete this record?', title: 'Delete', ok: 'Yes', cancel: 'No' })
+                                   .then(function (yes) {
+                                       $scope.CourierServiceAreasDtls.Mode = "Delete";
+                                       $scope.SaveCouriersvcAreaDetails();
+                                   }, function (no) {
+                                       return;
+                                   });
+            }
+        }
+        $scope.CheckAreaType = function () {
+            $scope.CourierServiceAreasDtls.AreaKey = "";
+            HideControls();
+        }
+
+        function HideControls() {
+            $scope.HideValidationDiv();
+            if (isEmpty($scope.CourierServiceAreasDtls.AreaTypeId)) {
+                $scope.IsAirport = false;
+                $scope.IsZipPostalCode = false;
+                $scope.IsRouteWork = false;
+                $scope.IsPostalCodeAirport = true;
+            }
+            var Type = $linq.Enumerable().From($scope.CCourierServiceAreasList)
+                                       .Where(function (x) {
+                                           return x.CodeId == $scope.CourierServiceAreasDtls.AreaTypeId;
+                                       })
+                                       .Select(function (x) {
+                                           return x.CodeDisplayName;
+                                       }).FirstOrDefault();
+            if (Type == "Route Master") {
+                $scope.IsAirport = false;
+                $scope.IsZipPostalCode = false;
+                $scope.IsRouteWork = true;
+                $scope.IsPostalCodeAirport = false;
+            }
+            else if (Type == "Airport") {
+                $scope.IsAirport = true;
+                $scope.IsZipPostalCode = false;
+                $scope.IsRouteWork = false;
+                $scope.IsPostalCodeAirport = false;
+                $("#txtAirport").attr('maxlength', '4');
+            }
+            else if (Type == "Zip/Postal Code") {
+                $scope.IsAirport = false;
+                $scope.IsZipPostalCode = true;
+                $scope.IsRouteWork = false;
+                $scope.IsPostalCodeAirport = false;
+                $scope.maxlength = 10;
+                $("#txtzippostalcode").attr('maxlength', '10');
+                $("#txtAirport").attr('maxlength', '10');
+            }
+            else {
+                $scope.IsPostalCodeAirport = true;
+                $("#txtzippostalcode").attr('maxlength', '10');
+                $("#txtAirport").attr('maxlength', '10');
+            }
+
+        }
+        $scope.OpenSearchPopup = function (controllerName, templateUrl, size, type) {
+            $scope.HideValidationDiv();
+            $scope.parentControlValues = {};
+            var modalInstance = $modal.open({
+                controller: controllerName,
+                templateUrl: templateUrl,
+                size: size,
+                resolve: {
+                    ParentControlDetails: function () {
+                        return $scope.parentControlValues;
+                    }
+                }
+            });
+            modalInstance.result.then(function () {
+                if (type == "Airport") {
+                    $scope.CourierServiceAreasDtls.AreaKey = $scope.parentControlValues.AirportId;
+                }
+                else if (type == "ZipPostalCode") {
+                    $scope.CourierServiceAreasDtls.AreaKey = $scope.parentControlValues.ZipCode;
+                }
+                else if (type == "AccountDetails") {
+                    $scope.CourierServiceAreasDtls.CustCode = $scope.parentControlValues.CustCode;
+                    $scope.CourierServiceAreasDtls.CustName = $scope.parentControlValues.CustName;
+                }
+            });
+        }
+
+        $scope.SearchZipcode = function () {
+            $scope.ErrorMsg = '';
+            if (!isEmpty($scope.CourierServiceAreasDtls.AreaKey) && ($scope.zip != $scope.CourierServiceAreasDtls.AreaKey)) {
+                var objcode = {
+                    "ZipCode": $scope.CourierServiceAreasDtls.AreaKey
+                };
+                var data = ngEncryption.encrypt(JSON.stringify(objcode));
+                var request = $http({
+                    method: "GET",
+                    url: "/api/General/ZipcodeCodeSearch",
+                    params: {
+                        RequestText: data
+                    }
+                }).then(function (successData) {
+                    if (successData.status == "202") {
+                        if ($scope.ErrorMsg != '')
+                            $scope.ErrorMsg = $scope.ErrorMsg + '\n' + successData.data;
+                        else
+                            $scope.ErrorMsg = successData.data;
+                        angular.element('#errorid').show();
+                        angular.element('#idReqValidation').show();
+                        $scope.CourierServiceAreasDtls.AreaKey = "";
+                    }
+                    else {
+                        if (successData != null) {
+                            var Objzip = JSON.parse(successData.data);
+                            $scope.ErrorMsg = "";
+                            angular.element('#errorid').hide();
+                            if (Objzip != undefined && Objzip != null) {
+                                $scope.CourierServiceAreasDtls.AreaKey = Objzip.ZipCode;
+                                $scope.zip = $scope.CourierServiceAreasDtls.AreaKey;
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        $scope.SearchAirport = function () {
+            $scope.ErrorMsg = '';
+            if (!isEmpty($scope.CourierServiceAreasDtls.AreaKey) && ($scope.air != $scope.CourierServiceAreasDtls.AreaKey)) {
+                var objair = {
+                    "AddressType": "",
+                    "ZipCode": "",
+                    "GetSuggestion": "N",
+                    "CustCode": "",
+                    "AirportId": $scope.CourierServiceAreasDtls.AreaKey
+                };
+                var data = ngEncryption.encrypt(JSON.stringify(objair));
+                var request = $http({
+                    method: "GET",
+                    url: "/api/General/SearchAirport",
+                    params: {
+                        RequestText: data
+                    }
+                }).then(function (successData) {
+                    if (successData.status == "202") {
+                        $scope.ErrorMsg = successData.data;
+                        angular.element('#errorid').show();
+                        angular.element('#idReqValidation').show();
+                        $scope.CourierServiceAreasDtls.AreaKey = "";
+                    }
+                    else {
+                        if (successData != null) {
+                            var Objair = JSON.parse(successData.data);
+                            $scope.ErrorMsg = "";
+                            angular.element('#errorid').hide();
+                            if (Objair != undefined && Objair != null) {
+                                $scope.CourierServiceAreasDtls.AreaKey = Objair.AirportId;
+                                $scope.air = $scope.CourierServiceAreasDtls.AreaKey;
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        $scope.SearchCustCode = function () {
+            $scope.ErrorMsg = '';
+            if (!isEmpty($scope.CourierServiceAreasDtls.CustCode) && ($scope.customer != $scope.CourierServiceAreasDtls.CustCode)) {
+                var objcustcode = {
+                    "CustCode": $scope.CourierServiceAreasDtls.CustCode
+                };
+                var data = ngEncryption.encrypt(JSON.stringify(objcustcode));
+                var request = $http({
+                    method: "POST",
+                    url: "/api/GetQuote/SearchAccount",
+                    params: {
+                        RequestText: data
+                    }
+                }).then(function (successData) {
+                    if (successData.status == "202") {
+                        $scope.ErrorMsg = successData.data;
+                        angular.element('#errorid').show();
+                        angular.element('#idReqValidation').show();
+                        $scope.CourierServiceAreasDtls.CustCode = "";
+                        $scope.CourierServiceAreasDtls.CustName = "";
+                    }
+                    else {
+                        if (successData != null) {
+                            var Objres = JSON.parse(successData.data);
+                            $scope.ErrorMsg = "";
+                            angular.element('#errorid').hide();
+                            if (Objres != undefined && Objres != null) {
+                                $scope.CourierServiceAreasDtls.CustCode = Objres.CustCode;
+                                $scope.CourierServiceAreasDtls.CustName = Objres.CustName;
+                                $scope.customer = $scope.CourierServiceAreasDtls.CustCode;
+                            }
+                        }
+                    }
+                });
+            }
+            else if (isEmpty($scope.CourierServiceAreasDtls.CustCode)) {
+                $scope.CourierServiceAreasDtls.CustName = "";
+            }
+        }
+
+    }]);

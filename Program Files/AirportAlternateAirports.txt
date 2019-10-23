@@ -1,0 +1,82 @@
+<div ng-controller="AirportAlternateAirportsController" ng-form="AirportAlternateAirportsForm">
+    <div class="panel-heading text-white">
+        Alternate Airport
+        <span style="vertical-align:top;">
+            <i class="sprite icon-WhiteAdd" id="ImgAdd" style="display:inline-block; margin-bottom:-4px;" ng-click="AddAlternateAirportDtls()" title="Add"></i>
+            <i class="sprite icon-WhiteSave padding-left-10" id="ImgSave" style="display:inline-block; margin-bottom:-4px;" ng-click="SaveAlternateAirportDtls()" title="Save"></i>
+            <i class="sprite icon-delete padding-left-10" id="ImgDelete" style="display:inline-block; margin-bottom:-4px;" ng-click="DeleteAlternateAirportDtls()" title="Delete"></i>
+        </span>
+    </div>
+
+    <div class="col-lg-12 col-sm-12 col-md-12 paddingleftright0">
+        <div name="ValidtionSummary" id="idReqValidation">
+            <div id="formerrorid">
+                <ul class="error-messages-val" ng-messages="AirportAlternateAirportsForm.txtalternateairport.$error">
+                    <li ng-message="required">
+                        <a href="#" class="icon_close closeicontop" ng-click="HideValidationDiv()"></a>
+                        AltAirportId Required.
+                    </li>
+                    <li ng-message="minlength">
+                        <a href="#" class="icon_close closeicontop" ng-click="HideValidationDiv()"></a>
+                        AltAirportId Required.
+                    </li>
+                </ul>
+            </div>
+            <div ng-if="ErrorMsg != ''" id="errorid">
+                <a href="#" class="icon_close" ng-click="HideValidationDiv()" id="anchorclose"></a>
+                <label class="text-red" compile="ErrorMsg" style="font-weight:normal!important"></label>
+            </div>
+        </div>
+        <div name="success" id="success" class="form-group" ng-class="addClass">
+            <label id="SuccessMsgid"> {{SuccessMsg}}</label>
+        </div>
+    </div>
+    <div class="form-group scrollboxTasklog" id="scrollMainScreen" ng-init="resizeModuleSub()">
+        <div class="row form-group">
+            <div class="pull-right padding-right-20">               
+                <input type="radio" name="RadioOptions" class="radio-custom" id="idActive" ng-model="value" value="Active" ng-change='rdBtnChange(value)' ng-checked="true" />
+                <label for="idActive" class="radio-custom-label">Active</label>
+                <input type="radio" name="RadioOptions" class="radio-custom" id="idDeleted" ng-model="value" value="Deleted" ng-change='rdBtnChange(value)'>
+                <label for="idDeleted" class="radio-custom-label">Deleted</label>
+                <input type="radio" name="RadioOptions" class="radio-custom" id="idAll" ng-model="value" value="All" ng-change='rdBtnChange(value)'>
+                <label for="idAll" class="radio-custom-label">All</label>
+            </div>
+        </div>
+        <div class="row form-group paddingleftright0 margin-b10" id="ScrollSubGrid" ng-init="resizeModuleSub()">
+            <gridcontrol-controller source="AlternateAirportList" id-New="NewId" req-Obj="ReqObj" column-List="ColumnList" virtual-Mode="VirtualMode" page-Size="AlternateAirportList.PageSize" sorting="sorting" height="Height" is-Pagervisible="IsPagerVisible" summary-Info="SummaryInfo">
+            </gridcontrol-controller>
+        </div>
+        <div id="scrollsubcontent">
+                <div class="subheader padding-left-5">
+                    <b>Alternate Airport</b>
+                </div>
+                <div class="white-bg">
+                    <div class="row form-group">
+                        <label class="col-lg-1 col-sm-1 col-md-1 paddingleft0right7 text-right width11 margin-top-5" id="lblalternateairport">Alternate Airport </label>
+                        <div class="col-lg-2 col-sm-2 col-md-2 paddingleftright0 margin-top-2">
+                            <input type="text" class="form-control" id="txtalternateairport" name="txtalternateairport" maxlength="4" ng-disabled="NotActiveFlag || IsOnEditDetail" ng-required="!NotActiveFlag" ng-class="{red: AirportAlternateAirportsForm.txtalternateairport.$invalid}"
+                                   typeahead="(Airport.Name+' - '+Airport.AirportId) for Airport in SearchAirportAutoSuggest($viewValue)"
+                                   ng-model="AlternateAirportDtls.AltAirportId"
+                                   typeahead-on-select="onSelectAirport($item)"
+                                   typeahead-no-results="noAirportFound"
+                                   typeahead-min-length="3"
+                                   typeahead-focus-first="false"
+                                   ng-blur="CheckAirportId();ContactNameToUpperCase()" style="text-transform: uppercase;" />
+                        </div>
+                        <div class="col-lg-1 col-sm-1 col-md-1 paddingleftright0 margin-top-5 padding-left-10">
+                            <input type="checkbox" class="checkbox-custom" id="chkbSelect" name="chkbSelect" ng-true-value="'Y'" ng-false-value="'N'" ng-model="AlternateAirportDtls.Selected" ng-disabled="NotActiveFlag"/>
+                            <label for="chkbSelect" class="checkbox-custom-label blackcolor padding-right-5">Select</label>
+                        </div>
+                    </div>
+                </div>
+        </div>
+    </div>
+</div>
+
+    <script type="text/javascript">
+      $('#scrollMainScreen , #scrollsubcontent').enscroll({
+            showOnHover: false,
+            verticalTrackClass: 'track3',
+            verticalHandleClass: 'handle3'
+        });
+    </script>

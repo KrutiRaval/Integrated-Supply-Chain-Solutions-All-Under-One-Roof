@@ -1,0 +1,82 @@
+<div ng-controller="CustServicesController" ng-form="CustServiceForm">
+    <div class="panel-heading text-white">
+        Cust Services
+        <span style="vertical-align:top;">
+            <i class="sprite icon-WhiteAdd"  ng-click="AddCustomerServiceDetails()" style="display:inline-block; margin-bottom:-4px;" title="Add"></i>
+            <i class="sprite icon-WhiteSave padding-left-10" id="ImgSave" style="display:inline-block; margin-bottom:-4px;" ng-click="SaveCustomerServiceDetails(CustService.ServiceId,CustService.AfHrStartTime,CustService.AfHrEndTime)" title="Save"></i>
+            @*<i class="sprite icon-delete padding-left-10" id="ImgDelete" style="display:inline-block; margin-bottom:-4px;" ng-click="DeleteCustomerServiceDetails(CustService.CustServiceId)" title="Delete"></i>*@
+        </span>
+    </div>  
+    <div name="success" id="success" class="form-group" ng-class="addClass">
+        <label id="SuccessMsgid"> {{SuccessMsg}}</label>
+    </div>
+    <div class="col-lg-12 col-sm-12 col-md-12 paddingleftright0">
+        <div name="ValidtionSummary" id="idReqValidation">
+            <div id="formerrorid">
+                <ul class="error-messages-val" ng-messages="CustServiceForm.cmbServiceName.$error">
+                    <li ng-message="required">
+                        <a href="#" class="icon_close closeicontop" ng-click="HideValidationDiv()"></a>
+                        Service Name Required
+                    </li>
+                </ul>
+            </div>
+            <div ng-if="ErrorMsg != ''" id="errorid">
+                <a href="#" class="icon_close" ng-click="HideValidationDiv()" id="anchorclose"></a>
+                <label class="text-red" compile="ErrorMsg" style="font-weight:normal!important"></label>
+            </div>
+        </div>
+    </div>       
+    <div class="form-group scrollboxTasklog" id="scrollMainScreen" ng-init="resizeModuleSub()">
+        <div class="row form-group paddingleftright0 margin-b10" id="ScrollSubGrid" ng-init="resizeModuleSub()">
+            <gridcontrol-controller source="CustServiceList" id-New="NewId" req-Obj="ReqObj" column-List="ColumnList" virtual-Mode="VirtualMode" page-Size="CustServiceList.PageSize" sorting="sorting" height="Height" is-Pagervisible="IsPagerVisible" summary-Info="SummaryInfo">
+            </gridcontrol-controller>
+        </div>
+        <div id="scrollsubcontent">
+            <div class="row form-group subheader padding-left-5 margin-top-5">
+                <b>Service Class</b>
+            </div>
+            <div class="white-bg">
+                <div class="row form-group">
+                    <label class="col-lg-2 col-sm-2 col-md-2 paddingleft0right7">Service Name</label>
+                    <label class="col-lg-1 col-sm-1 col-md-1 paddingleft0right7"></label>
+                    <label class="col-lg-2 col-sm-2 col-md-2 paddingleft0right7">After Hr Start</label>
+                    <label class="col-lg-2 col-sm-2 col-md-2 paddingleft0right7">After Hr End</label>
+                    <label class="col-lg-1 col-sm-1 col-md-1 paddingleft0right7"> </label>
+                </div>
+                <div class="form-group">
+                    <div class="col-lg-2 col-md-2 col-sm-2 paddingleft0right7">
+                        <select class="form-control red" id="cmbServiceName" name="cmbServiceName" ng-required="getModeFlag || addModeFlag" ng-model="CustService.ServiceId" ng-class="{red: CustServiceForm.cmbServiceName.$invalid}"
+                                ng-options="s.CodeValue as s.CodeDisplayName for s in ServiceTypeList" ng-readonly="getModeFlag || editModeFlag" ng-disabled="getModeFlag || editModeFlag">
+                            <option value="">(Select)</option>
+                        </select>
+                    </div>
+                    <div class="col-lg-1 col-md-1 col-sm-1 paddingleftright0 margin-top-2">
+                        <input id="chkbRestricted" class="checkbox-custom ng-pristine ng-untouched ng-valid" type="checkbox" ng-true-value="'Y'" ng-false-value="'N'" ng-model="CustService.Restricated" ng-readonly="getModeFlag" ng-disabled="getModeFlag">
+                        <label for="chkbRestricted" class="checkbox-custom-label blackcolor font11 padding-right-5"><i>Restricted</i></label>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-2 paddingleft0right7">
+                        <input class="form-control ng-pristine ng-valid ng-valid-maxlength ng-touched text-right" id="txtAfterHrStart" name="txtAfterHrStart" type="text" ng-model="CustService.AfHrStartTime" ng-readonly="getModeFlag" jtimepicker="jtimepicker" maxlength="5" ng-required="ValStartTime" numbers-only >
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-2 paddingleft0right7">
+                        <input class="form-control ng-pristine ng-valid ng-valid-maxlength ng-touched text-right" id="txtAfterHrEnd" name="txtAfterHrEnd" type="text" ng-model="CustService.AfHrEndTime" ng-readonly="getModeFlag" jtimepicker="jtimepicker" maxlength="5" numbers-only>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-lg-12 col-sm-12 col-md-12 paddingleft0right7">Note</label>
+                </div>
+                <div class="form-group row">
+                    <div class="col-lg-12 col-md-12 col-sm-12 paddingleft0right7">
+                        <input class="form-control ng-pristine ng-valid hasDatepicker ng-valid-maxlength ng-touched" id="txtAfterHrEnd" maxlength="255" type="text" ng-model="CustService.Note" ng-readonly="getModeFlag">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+        <script type="text/javascript">
+            $('#ScrollSubGrid, #scrollMainScreen').enscroll({
+                showOnHover: false,
+                verticalTrackClass: 'track3',
+                verticalHandleClass: 'handle3'
+            });
+        </script>
