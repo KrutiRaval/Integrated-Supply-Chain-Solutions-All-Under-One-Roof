@@ -1,0 +1,116 @@
+<div ng-controller="CourierServiceAreasController" ng-form="CourierServiceAreasForm">
+    <div class="panel-heading text-white">
+        Courier Service Areas
+        <span style="vertical-align:top;">
+            <i class="sprite icon-WhiteAdd" id="ImgAdd" style="display:inline-block; margin-bottom:-4px;" ng-click="AddCouriersvcAreaDetails()" title="Add"></i>
+            <i class="sprite icon-WhiteSave padding-left-10" id="ImgSave" style="display:inline-block; margin-bottom:-4px;" ng-click="SaveCouriersvcAreaDetails()" title="Save"></i>
+            <i class="sprite icon-delete padding-left-10" id="ImgDelete" style="display:inline-block; margin-bottom:-4px;" ng-click="DeleteCouriersvcAreaDetails()" title="Delete"></i>
+        </span>
+    </div>
+    <div class="col-lg-12 col-sm-12 col-md-12 paddingleftright0">
+        <div name="ValidtionSummary" id="idReqValidation">
+            <div id="formerrorid">
+                <ul class="error-messages-val" ng-messages="CourierServiceAreasForm.cmbareatype.$error">
+                    <li ng-message="required">
+                        <a href="#" class="icon_close closeicontop" ng-click="HideValidationDiv()"></a>
+                        Area Type Required.
+                    </li>
+                </ul>
+                <ul class="error-messages-val" ng-messages="CourierServiceAreasForm.txtvalidfrom.$error">
+                    <li ng-message="required">
+                        <a href="#" class="icon_close closeicontop" ng-click="HideValidationDiv()"></a>
+                        Valid From Required.
+                    </li>
+                </ul>
+            </div>
+            <div ng-if="ErrorMsg != ''" id="errorid">
+                <a href="#" class="icon_close" ng-click="HideValidationDiv()" id="anchorclose"></a>
+                <label class="text-red" compile="ErrorMsg" style="font-weight:normal!important"></label>
+            </div>
+        </div>
+        <div name="success" id="success" class="form-group" ng-class="addClass">
+            <label id="SuccessMsgid"> {{SuccessMsg}}</label>
+        </div>
+    </div>
+    <div class="form-group scrollboxTasklog" id="scrollMainScreen" ng-init="resizeModuleSub()">
+        <div class="row form-group margin-b-5">
+            <div class="pull-right padding-right-20">
+                <input type="radio" name="RadioOptions" class="radio-custom" id="idActive" ng-model="value" value="Active" ng-change='rdBtnChange(value)' ng-checked="true" />
+                <label for="idActive" class="radio-custom-label">Active</label>
+                <input type="radio" name="RadioOptions" class="radio-custom" id="idDeleted" ng-model="value" value="Deleted" ng-change='rdBtnChange(value)'>
+                <label for="idDeleted" class="radio-custom-label">Deleted</label>
+                <input type="radio" name="RadioOptions" class="radio-custom" id="idAll" ng-model="value" value="All" ng-change='rdBtnChange(value)'>
+                <label for="idAll" class="radio-custom-label">All</label>
+            </div>
+        </div>
+        <div class="row form-group paddingleftright0 margin-b10" id="ScrollSubGrid" ng-init="resizeModuleSub()">
+            <gridcontrol-controller source="CourierServiceAreasList" id-New="NewId" req-Obj="ReqObj" column-List="ColumnList" virtual-Mode="VirtualMode" page-Size="CourierServiceAreasList.PageSize" sorting="sorting" height="Height" is-Pagervisible="IsPagerVisible" summary-Info="SummaryInfo">
+            </gridcontrol-controller>
+        </div>
+        <div id="scrollsubcontent">
+            <div class="row form-group subheader padding-left-5">
+                <strong>Courier Service Area Detail</strong>
+            </div>
+            <div class="white-bg">
+                <div class="row form-group">
+                    <label class="col-sm-3 col-lg-3 col-md-3 paddingleft0right7" id="lblAreaType">Area Type </label>
+                    <label class="col-sm-3 col-lg-3 col-md-3 paddingleft0right7" id="lblPostalCodeAirportId" ng-hide="IsRouteWork || IsAirport || IsZipPostalCode">PostalCode/ Airport</label>
+                    <label class="col-sm-3 col-lg-3 col-md-3 paddingleft0right7" id="lblRouteWorkId" ng-show="IsRouteWork">RouteWorkId </label>
+                    <label class="col-sm-3 col-lg-3 col-md-3 paddingleft0right7" id="lblAirportId" ng-show="IsAirport">Airport </label>
+                    <label class="col-sm-3 col-lg-3 col-md-3 paddingleft0right7" id="lblZipPostalCodeId" ng-show="IsZipPostalCode">Zip/Postal Code </label>
+                    <label class="col-sm-3 col-lg-3 col-md-3 paddingleft0right7" id="lblAccount">Account# </label>
+                    <label class="col-sm-3 col-lg-3 col-md-3 paddingleft0right7" id="lblCustomerName">Customer Name </label>
+                </div>
+                <div class="row form-group">
+                    <div class="col-sm-3 col-lg-3 col-md-3 paddingleft0right7">
+                        <select class="form-control" id="cmbareatype" name="cmbareatype" ng-model="CourierServiceAreasDtls.AreaTypeId" ng-required="!IsOnEditDetail" ng-class="{red: CourierServiceAreasForm.cmbareatype.$invalid}" ng-options="s.CodeId as s.CodeDisplayName for s in CCourierServiceAreasList" ng-change="CheckAreaType()" ng-disabled="IsOnEditDetail || NotActiveFlag">
+                            <option value="">(Select)</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-3 col-lg-3 col-md-3 paddingleft0right7">
+                        <select class="form-control" id="cmbRouteWorkId" ng-model="CourierServiceAreasDtls.RouteAreaKey" ng-show="IsRouteWork" ng-options="s.RouteMasterID as s.RouteWorkId for s in RouteWorkServiceList" ng-disabled="NotActiveFlag">
+                            <option value="">ALL</option>
+                        </select>
+                        <input type="text" class="form-control" id="txtPostalCodeAirportId" ng-model="CourierServiceAreasDtls.PostalCodeAirport" ng-hide="IsRouteWork || IsAirport || IsZipPostalCode" ng-readonly="NotActiveFlag" />
+                        <div class="input-group">
+                            <input type="text" class="form-control" ng-show="IsZipPostalCode" id="txtzippostalcode" ng-model="CourierServiceAreasDtls.AreaKey" capitalize ng-focus="zip = CourierServiceAreasDtls.AreaKey" my-Tab-Blur="SearchZipcode()" ng-readonly="NotActiveFlag" />
+                            <input type="text" class="form-control" ng-show="IsAirport" id="txtAirport" ng-model="CourierServiceAreasDtls.AreaKey" capitalize ng-focus="air = CourierServiceAreasDtls.AreaKey" my-Tab-Blur="SearchAirport()" ng-readonly="NotActiveFlag" />
+                            <span class="input-group-addon paddingleftright0 padding-left-5"><i id="idAirSearch" name="idAirSearch" class="sprite icon-Search" ng-show="IsAirport" ng-click="OpenSearchPopup('AirportSearchController', '/GetQuote/AirportSearch', 'sm', 'Airport')"></i></span>
+                            <span class="input-group-addon paddingleftright0 padding-left-5"><i id="idZipSearch" name="idZipSearch" class="sprite icon-Search" ng-show="IsZipPostalCode" ng-click="OpenSearchPopup('ZipCodeSearchController', '/GetQuote/ZipCodeSearch', 'sm', 'ZipPostalCode')"></i></span>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-sm-3 col-md-3 paddingleft0right7">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="txtAccountId" maxlength="20" ng-model="CourierServiceAreasDtls.CustCode" ng-focus="customer = CourierServiceAreasDtls.CustCode" ng-blur="SearchCustCode()" ng-readonly="NotActiveFlag" />
+                            <span class="input-group-addon paddingleftright0 padding-left-5">
+                                <span class="input-group-addon paddingleftright0 padding-left-5"><i id="idCustSearch" name="idCustSearch" class="sprite icon-Search" ng-click="OpenSearchPopup('CustomerDetailsController','/GetQuote/CustomerDetails','sm','AccountDetails')"></i></span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-sm-3 col-lg-3 col-md-3 paddingleft0right7">
+                        <input type="text" class="form-control" id="txtName" ng-model="CourierServiceAreasDtls.CustName" ng-readonly="true" maxlength="50" ng-disabled="NotActiveFlag" />
+                    </div>
+                </div>
+                <div class="row form-group">
+                    <label class="col-sm-2 col-lg-2 col-md-2 paddingleft0right7" id="lblvalidfrom">Valid From </label>
+                    <label class="col-sm-2 col-lg-2 col-md-2 paddingleft0right7" id="lblvalidto">Valid To </label>
+                </div>
+                <div class="row form-group">
+                    <div class="col-sm-2 col-lg-2 col-md-2 paddingleft0right7">
+                        <input type="text" class="form-control" id="txtvalidfrom" name="txtvalidfrom" ng-model="CourierServiceAreasDtls.ValidFrom" jqdatepicker="jqdatepicker" ng-required="!IsOnEditDetail" ng-class="{red: CourierServiceAreasForm.txtvalidfrom.$invalid}" ng-disabled="NotActiveFlag" />
+                    </div>
+                    <div class="col-sm-2 col-lg-2 col-md-2 paddingleft0right7">
+                        <input type="text" class="form-control" id="txtvalidto" name="txtvalidto" ng-model="CourierServiceAreasDtls.ValidTo" jqdatepicker="jqdatepicker" ng-disabled="NotActiveFlag" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $('#scrollMainScreen, #scrollsubcontent').enscroll({
+        showOnHover: false,
+        verticalTrackClass: 'track3',
+        verticalHandleClass: 'handle3'
+    });
+</script>
